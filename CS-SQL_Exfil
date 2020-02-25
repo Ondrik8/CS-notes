@@ -1,0 +1,18 @@
+powershell-import /path/to/PowerUpSQL-master/PowerUpSQL.ps1 # https://github.com/NetSPI/PowerUpSQL
+
+powerpick Get-SQLInstanceDomain
+powerpick Get-SQLInstanceDomain | Get-SQLServerInfo
+
+# Check for AuthenticationMode (ex: Windows Authentication) and Currentlogin (current user)
+
+powerpick Get-SQLInstanceDomain | Get-SQLDatabase -NoDefaults # note the DatabaseName
+
+powerpick Get-SQLInstanceDomain | Get-SQLTable -DatabaseName CustomerInfo -NoDefaults #note the TableName
+
+powerpick Get-SQLInstanceDomain | Get-SQLColumn -DatabaseName CustomerInfo -TableName Records
+
+powerpick Get-SQLInstanceDomain |Get-SQLColumnSampleData -Keywords "ssn,social,address" -Verbose -SampleSize 3
+
+
+
+
